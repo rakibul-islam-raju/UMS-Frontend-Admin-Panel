@@ -1,46 +1,109 @@
 "use client";
 
-import SidebarMenus from "@/constants/SidebarMenus";
-import { ROLES } from "@/constants/roles";
-import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
-import { Button, Layout, Menu, MenuProps, theme } from "antd";
+import { Divider, Drawer, List, Typography } from "@mui/material";
+import { DrawerHeader } from "./DashboardLayoutContent";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import Collapse from "@mui/material/Collapse";
+import ExpandLess from "@mui/icons-material/ExpandLess";
+import ExpandMore from "@mui/icons-material/ExpandMore";
 import { useState } from "react";
-const { Sider } = Layout;
+import SidebarMenus, { MenuItem } from "@/constants/SidebarMenus";
+import { ROLES } from "@/constants/roles";
+import { useRouter } from "next/navigation";
 
-const Sidebar: React.FC = () => {
-	const [collapsed, setCollapsed] = useState(false);
+export const drawerWidth = 240;
 
-	const {
-		token: { colorBgContainer, colorPrimary },
-	} = theme.useToken();
+type SidebarProps = {
+	open: boolean;
+	handleDrawerClose: () => void;
+};
+
+const Sidebar: React.FC<SidebarProps> = ({ open, handleDrawerClose }) => {
+	const router = useRouter();
+
+	const [menuAnchor, setMenuAnchor] = useState<string | null>(null);
+
+	const handleClick = (menuItem: MenuItem) => {
+		if (menuItem.path) router.push(menuItem.path);
+		if (menuItem.children) {
+			if (menuItem.key === menuAnchor) {
+				setMenuAnchor(null);
+			} else {
+				setMenuAnchor(menuItem.key);
+			}
+		}
+	};
 
 	return (
-		<Sider
-			trigger={null}
-			collapsible
-			collapsed={collapsed}
-			style={{ minHeight: "100vh", position: "relative" }}
+		<Drawer
+			sx={{
+				width: drawerWidth,
+				flexShrink: 0,
+				whiteSpace: "nowrap",
+				boxSizing: "border-box",
+				"& .MuiDrawer-paper": {
+					width: drawerWidth,
+				},
+			}}
+			variant="persistent"
+			anchor="left"
+			open={open}
 		>
-			<div className="demo-logo-vertical" />
-			<Menu
-				theme="dark"
-				mode="inline"
-				defaultSelectedKeys={["1"]}
-				items={SidebarMenus(ROLES.ADMIN)}
-			/>
-
-			<div style={{ position: "absolute", top: 8, right: -35 }}>
-				<Button
-					type="text"
-					icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-					onClick={() => setCollapsed(!collapsed)}
-					style={{
-						backgroundColor: colorPrimary,
-						color: "#fff",
-					}}
-				></Button>
-			</div>
-		</Sider>
+			<DrawerHeader>
+				<Typography variant="h5" align="center">
+					UMS
+				</Typography>
+			</DrawerHeader>
+			<Divider />
+			<List
+				sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}
+				component="nav"
+				aria-labelledby="sidebar-manus"
+			>
+				{SidebarMenus(ROLES.ADMIN).map((menu) => {
+					if (menu?.children) {
+						return (
+							<>
+								<ListItemButton
+									onClick={() => handleClick(menu)}
+									key={menu.key}
+								>
+									<ListItemIcon>{menu.icon}</ListItemIcon>
+									<ListItemText primary={menu.label} />
+									{menu.key === menuAnchor ? <ExpandLess /> : <ExpandMore />}
+								</ListItemButton>
+								<Collapse
+									in={menu.key === menuAnchor}
+									timeout="auto"
+									unmountOnExit
+								>
+									{menu.children.map((submenu) => (
+										<List key={submenu.key} component="div" disablePadding>
+											<ListItemButton
+												onClick={() => handleClick(submenu)}
+												sx={{ pl: 4 }}
+											>
+												<ListItemIcon>{submenu.icon}</ListItemIcon>
+												<ListItemText primary={submenu.label} />
+											</ListItemButton>
+										</List>
+									))}
+								</Collapse>
+							</>
+						);
+					} else {
+						return (
+							<ListItemButton onClick={() => handleClick(menu)} key={menu.key}>
+								<ListItemIcon>{menu.icon}</ListItemIcon>
+								<ListItemText primary={menu.label} />
+							</ListItemButton>
+						);
+					}
+				})}
+			</List>
+		</Drawer>
 	);
 };
 

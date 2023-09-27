@@ -1,5 +1,9 @@
 const Student = () => {
-	return <div>Student</div>;
+	return (
+		<div>
+			Studentttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt
+		</div>
+	);
 };
 
 export default Student;

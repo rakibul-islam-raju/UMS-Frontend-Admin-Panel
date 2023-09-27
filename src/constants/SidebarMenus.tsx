@@ -1,21 +1,16 @@
-import {
-	MenuFoldOutlined,
-	TeamOutlined,
-	HomeOutlined,
-} from "@ant-design/icons";
-import { ItemType } from "antd/es/menu/hooks/useItems";
+import HomeIcon from "@mui/icons-material/Home";
 import { ROLES } from "./roles";
-import Link from "next/link";
 
-type CustomMenuItem = ItemType & {
+export type MenuItem = {
+	label: string;
+	key: string;
+	path?: string;
 	role?: string;
-	children?: CustomMenuItem[];
+	icon?: React.ReactNode;
+	children?: MenuItem[];
 };
 
-const filterMenuItems = (
-	menuItems: CustomMenuItem[],
-	role: string
-): CustomMenuItem[] => {
+const filterMenuItems = (menuItems: MenuItem[], role: string): MenuItem[] => {
 	return menuItems
 		.filter((item) => item.role === role || !item.role)
 		.map((item) => {
@@ -27,22 +22,23 @@ const filterMenuItems = (
 		});
 };
 
-const SidebarMenus = (role: string) => {
-	const MENUS: CustomMenuItem[] = [
+const SidebarMenus = (role: string): MenuItem[] => {
+	const MENUS: MenuItem[] = [
 		{
-			label: <Link href={`/`}>Home</Link>,
+			label: "Home",
+			path: `/`,
 			key: "/",
-			icon: <HomeOutlined />,
+			icon: <HomeIcon />,
 		},
 		// admin menus
 		{
 			label: "Management",
 			key: "management",
-			icon: <MenuFoldOutlined />,
+			icon: <HomeIcon />,
 			role: ROLES.ADMIN,
 			children: [
 				{
-					label: <Link href={`/${role}/faculty`}>Faculty</Link>,
+					label: "Faculty",
 					key: `${role}/faculty`,
 				},
 			],
@@ -51,10 +47,10 @@ const SidebarMenus = (role: string) => {
 		{
 			label: "Profile",
 			key: "profile",
-			icon: <MenuFoldOutlined />,
+			icon: <HomeIcon />,
 			children: [
 				{
-					label: <Link href={`/${role}/user-profile`}>User Profile</Link>,
+					label: "User Profile",
 					key: `${role}/user-profile`,
 				},
 			],
