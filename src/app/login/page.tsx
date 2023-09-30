@@ -19,6 +19,8 @@ import {
 	Typography,
 } from "@mui/material";
 import { useState } from "react";
+import { useUserLoginMutation } from "@/redux/apis/authApi";
+import { storeUserInfo } from "@/services/authService";
 
 type FormValues = {
 	id: string;
@@ -26,11 +28,16 @@ type FormValues = {
 };
 
 const Login = () => {
+	const [userLogin, { isLoading, isError, error, isSuccess }] =
+		useUserLoginMutation();
+
 	const [showPass, setShowPass] = useState(false);
 
-	const onSubmit: SubmitHandler<FormValues> = (data) => {
+	const onSubmit: SubmitHandler<FormValues> = async (data) => {
 		try {
-			console.log(data);
+			const res = await userLogin(data).unwrap();
+
+			storeUserInfo(res?.accessToken);
 		} catch (error) {
 			console.log(error);
 		}
